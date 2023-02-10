@@ -83,3 +83,29 @@ if (FALSE) {
     names()
 
 }
+
+
+
+if (FALSE) {
+    old <- utils::old.packages()[,1]
+
+    cli::cli_alert_info("Outdated packages: {.pkg {old}}")
+
+    cli::cli_text("to update old package type,
+                {.run pak::pkg_install(old, upgrade = TRUE, ask = FALSE)}")
+
+
+    ps_pi <- purrr::possibly(pak::pkg_install, otherwise = NULL)
+    pi    <- purrr::map(old, ps_pi, ask = FALSE)
+    names(pi) <- old
+
+    # packages that failed
+    pi |>
+      purrr::keep(is.null) |>
+      names() |>
+      {\(xx) cli::cli_text("Packages that failed:
+                           {.pkg {xx}}")}()
+
+
+
+}
