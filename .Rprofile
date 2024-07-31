@@ -1,6 +1,7 @@
 local({
   r <- getOption("repos")
-  r["CRAN"] <- "https://cran.microsoft.com"
+  # r["CRAN"] <- "https://cran.microsoft.com"
+  # r["CRAN"] <- "cran.r-project.org/"
   options(repos = r)
 })
 
@@ -35,6 +36,28 @@ local({
 #
 # }
 
+# setting library paths
+# from https://milesmcbain.xyz/posts/hacking-r-library-paths/
+set_lib_paths <- function(lib_vec) {
+
+  lib_vec <- normalizePath(lib_vec, mustWork = TRUE)
+
+  shim_fun <- .libPaths
+  shim_env <- new.env(parent = environment(shim_fun))
+  shim_env$.Library <- character()
+  shim_env$.Library.site <- character()
+
+  environment(shim_fun) <- shim_env
+  shim_fun(lib_vec)
+}
+
+Sys.getenv("R_LIBS_USER") |>
+  set_lib_paths()
+
+
+
+
+
 if (FALSE) {
   libuse <- Sys.getenv("R_LIBS_USER") |>
     fs::path_dir()
@@ -46,13 +69,18 @@ if (FALSE) {
 
 
   old_dir  <- libuse |>
-    fs::path(vers[-2])
+    fs::path(vers[length(vers) - 1])
+
+  # old_dir <- "C:/Users/wb384996/R/win-library/" |>
+  #   fs::path(vers[length(vers)])
+
   old <- old_dir |>
     fs::dir_ls(type = "dir") |>
     fs::path_file()
 
   new_dir <- libuse |>
-    fs::path(vers[-1])
+    fs::path(vers[length(vers)])
+
   new <- new_dir |>
     fs::dir_ls(type = "dir") |>
     fs::path_file()
@@ -73,7 +101,8 @@ if (FALSE) {
   pkgs <- c(from_gh, from_cran) |>
     {\(.) .[!is.na(.)]}()
 
-  ps_pi <- purrr::possibly(pak::pkg_install, otherwise = NULL)
+  ps_pi <- purrr::possibly(pak::pak,
+                           otherwise = NULL)
   pi    <- purrr::map(pkgs, ps_pi, ask = FALSE)
   names(pi) <- pkgs
 
@@ -95,7 +124,7 @@ if (FALSE) {
                 {.run pak::pkg_install(old, upgrade = TRUE, ask = FALSE)}")
 
 
-    ps_pi <- purrr::possibly(pak::pkg_install, otherwise = NULL)
+    ps_pi <- purrr::possibly(pak::pak, otherwise = NULL)
     pi    <- purrr::map(old, ps_pi, ask = FALSE)
     names(pi) <- old
 
