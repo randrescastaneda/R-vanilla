@@ -1,39 +1,40 @@
 local({
   r <- getOption("repos")
-  r["CRAN"] <- "https://cran.microsoft.com"
+  # r["CRAN"] <- "https://cran.microsoft.com"
+  r["CRAN"] = "https://cran.rstudio.com/"
   options(repos = r)
 })
 
 .Last <- function() system("R --vanilla")
 
-# if (!requireNamespace("fs", quietly = TRUE)) {
-#   utils::install.packages("fs")
-#   .rs.restartR()
-# }
-#
-# if (!requireNamespace("pak", quietly = TRUE)) {
-#   utils::install.packages("pak")
-#   .rs.restartR()
-# }
-#
-#
-#
-# if (requireNamespace("cli", quietly = TRUE)) {
-#   old <- utils::old.packages()[,1]
-#
-#   cli::cli_alert_info("Outdated packages: {.pkg {old}}")
-#
-#   cli::cli_text("to update old package type,
-#               {.run pak::pkg_install(old, upgrade = TRUE, ask = FALSE)}")
-#
-#
-# } else {
-#   dd <- sessionInfo()
-#   major <- dd$R.version$major
-#   libuse <- Sys.getenv("R_LIB_USER") |>
-#     gsub("")
-#
-# }
+if (!requireNamespace("fs", quietly = TRUE)) {
+  utils::install.packages("fs")
+  .rs.restartR()
+}
+
+if (!requireNamespace("pak", quietly = TRUE)) {
+  utils::install.packages("pak", dependencies = TRUE)
+  .rs.restartR()
+}
+
+
+
+if (requireNamespace("cli", quietly = TRUE)) {
+  old <- utils::old.packages()[,1]
+
+  cli::cli_alert_info("Outdated packages: {.pkg {old}}")
+
+  cli::cli_text("to update old package type,
+              {.run pak::pkg_install(old, upgrade = TRUE, ask = FALSE)}")
+
+
+} else {
+  dd <- sessionInfo()
+  major <- dd$R.version$major
+  libuse <- Sys.getenv("R_LIB_USER") |>
+    gsub("")
+
+}
 
 if (FALSE) {
   libuse <- Sys.getenv("R_LIBS_USER") |>
@@ -74,7 +75,7 @@ if (FALSE) {
     {\(.) .[!is.na(.)]}()
 
   ps_pi <- purrr::possibly(pak::pkg_install, otherwise = NULL)
-  pi    <- purrr::map(pkgs, ps_pi, ask = FALSE)
+  pi    <- purrr::map(pkgs, ps_pi, ask = FALSE, dependencies = TRUE)
   names(pi) <- pkgs
 
   # packages that failed
@@ -92,11 +93,12 @@ if (FALSE) {
     cli::cli_alert_info("Outdated packages: {.pkg {old}}")
 
     cli::cli_text("to update old package type,
-                {.run pak::pkg_install(old, upgrade = TRUE, ask = FALSE)}")
+                {.run pak::pak(old, upgrade = TRUE, ask = FALSE)}")
 
 
-    ps_pi <- purrr::possibly(pak::pkg_install, otherwise = NULL)
-    pi    <- purrr::map(old, ps_pi, ask = FALSE)
+    ps_pi <- purrr::possibly(pak::pak, otherwise = NULL)
+    ps_pi <- purrr::possibly(install.packages, otherwise = NULL)
+    pi    <- purrr::map(old, ps_pi, , dependencies = TRUE)
     names(pi) <- old
 
     # packages that failed
@@ -108,4 +110,11 @@ if (FALSE) {
 
 
 
+}
+
+
+
+if (FALSE) {
+  pkgs <- pak::lib_status()$package
+  pak::pak(pkgs, upgrade = TRUE)
 }
