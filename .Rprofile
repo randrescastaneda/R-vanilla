@@ -31,8 +31,7 @@ if (requireNamespace("cli", quietly = TRUE)) {
 } else {
   dd <- sessionInfo()
   major <- dd$R.version$major
-  libuse <- Sys.getenv("R_LIB_USER") |>
-    gsub("")
+  libuse <- Sys.getenv("R_LIBS_USER")
 
 }
 
@@ -69,14 +68,14 @@ if (FALSE) {
 
   # from CRAN
   from_cran <- ls[ls$repository == "CRAN", "package"]
-
+  from_cran <- from_cran[!is.na(from_cran)]
   # get package to be installed
-  pkgs <- c(from_gh, from_cran) |>
-    {\(.) .[!is.na(.)]}()
+  install.packages(from_cran)
 
-  ps_pi <- purrr::possibly(pak::pkg_install, otherwise = NULL)
-  pi    <- purrr::map(pkgs, ps_pi, ask = FALSE, dependencies = TRUE)
-  names(pi) <- pkgs
+
+  ps_pi <- purrr::possibly(remotes::install_github, otherwise = NULL)
+  pi    <- purrr::map(from_gh, ps_pi)
+  names(pi) <- from_gh
 
   # packages that failed
   pi |>
@@ -117,4 +116,28 @@ if (FALSE) {
 if (FALSE) {
   pkgs <- pak::lib_status()$package
   pak::pak(pkgs, upgrade = TRUE)
+}
+
+
+
+if (FALSE) {
+  gca <- function(x, ...) {
+    gert::git_commit_all(x, ...)
+  }
+
+  gp <- function(x = NULL, ...) {
+    gert::git_push(x, ...)
+  }
+
+  ga <- function(...) {
+    gert::git_add(gert::git_status(...)$file)
+  }
+
+  gi <- function() {
+    gert::git_info()$upstream
+  }
+  gs <- function() {
+    gert::git_status()
+  }
+
 }
