@@ -5,7 +5,7 @@ local({
   options(repos = r)
 })
 
-.Last <- function() system("R --vanilla")
+
 
 # if (!requireNamespace("fs", quietly = TRUE)) {
 #   utils::install.packages("fs")
@@ -56,9 +56,14 @@ Sys.getenv("R_LIBS_USER") |>
 
 
 
-
-
 if (FALSE) {
+  dir <- "P:/02.personal/wb384996/temporal/R/R_pkgs.RDS"
+
+
+  tdirp <- fs::path("p:/02.personal/wb384996/temporal/R/")
+  tdire <- fs::path("E:/PovcalNet/01.personal/wb384996/temp/R")
+
+
   libuse <- Sys.getenv("R_LIBS_USER") |>
     fs::path_dir()
 
@@ -87,6 +92,7 @@ if (FALSE) {
 
   # get only packages that are not in new
   pkg <- setdiff(old, new)
+  saveRDS(pkg, fs::path(tdirp, "R_pkgs.RDS"))
 
   ls <- pak::lib_status(lib = old_dir) |>
     {\(.) .[.$package %in% pkg, ]}()
